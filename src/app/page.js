@@ -1,6 +1,7 @@
 'use client';
 import Head from 'next/head';
 import { useState } from 'react';
+import { phoneAuth, validateSMS } from '../../helper/utils';
 
 export default function Home() {
 	const [value, setValue] = useState({
@@ -17,26 +18,36 @@ export default function Home() {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
+		setIsLoading(true);
 		phoneAuth(value.phone)
 			.then((res) => {
 				setUser(res.userId);
 				setIsPhoneVerify(true);
+				setIsLoading(false);
+				console.log(res);
 			})
 			.catch((e) => {
 				alert('Error getting phone session!', e);
+				console.log(e);
+				setIsLoading(false);
 			});
 	};
 
 	const handleValidatePhone = (e) => {
 		e.preventDefault();
+		setIsLoading(true);
 		validateSMS(user, value.otp)
 			.then((res) => {
 				alert(
 					`User successfully verified using for user with ID ${res.userId}, country Code ${res.countryCode}, and expires on ${res.expire}`
 				);
+				setIsLoading(false);
+				console.log(res);
 			})
 			.catch((e) => {
 				alert('Error validating session!', e);
+				setIsLoading(false);
+				console.log(e);
 			});
 	};
 
@@ -65,7 +76,7 @@ export default function Home() {
 									Verify phone number
 								</h3>
 							</div>
-							<form onSubmit={handleSubmit}>
+							<form onSubmit={handleValidatePhone}>
 								<fieldset>
 									<label className='text-sm text-gray-400 mb-4 block'>
 										OTP
@@ -90,7 +101,9 @@ export default function Home() {
 					) : (
 						<div className='px-4 py-2 border rounded-lg w-full lg:w-2/4'>
 							<div className='border-b h-8 mb-4'>
-								<h3 className='text-gray-700'>Send SMS</h3>
+								<h3 className='text-gray-700'>
+									Authenticate with your phone number
+								</h3>
 							</div>
 							<form onSubmit={handleSubmit}>
 								<fieldset>
